@@ -7,16 +7,14 @@
 RCT_EXPORT_MODULE(RNTQiniu);
 
 RCT_EXPORT_METHOD(upload:(NSDictionary*)options
-                  onSuccess:(RCTResponseSenderBlock)onSuccess
-                  onFailure:(RCTResponseSenderBlock)onFailure
-                  onProgress:(RCTResponseSenderBlock)onProgress) {
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
 
     NSString *path = [RCTConvert NSString:options[@"path"]];
     NSString *key = [RCTConvert NSString:options[@"key"]];
     NSString *zone = [RCTConvert NSString:options[@"zone"]];
     NSString *token = [RCTConvert NSString:options[@"token"]];
     NSString *mimeType = [RCTConvert NSString:options[@"mimeType"]];
-    NSDictionary *params = [RCTConvert NSDictionary:options[@"params"]];
     
     QNConfiguration *config = [QNConfiguration build:^(QNConfigurationBuilder *builder) {
         
@@ -41,25 +39,18 @@ RCT_EXPORT_METHOD(upload:(NSDictionary*)options
 
     QNUploadOption *uploadOption = [[QNUploadOption alloc] initWithMime:mimeType
                                                 progressHandler:^(NSString *key, float percent) {
-                                                    onProgress(@[@{
-                                                         @"progress": @(percent),
-                                                    }]);
+                                                    // 回调函数或 promise 都只能调一次，如果要对外发送进度，得用事件，太麻烦了，算了
                                                 }
-                                                params:params
+                                                params:nil
                                                 checkCrc:NO
                                                 cancellationSignal:nil];
     
     [uploadManager putFile:path key:key token:token complete:^(QNResponseInfo *info, NSString *key, NSDictionary *resp) {
         if (info.ok) {
-            onSuccess(@[@{
-                 @"success": @(YES),
-            }]);
+            resolve(resp);
         }
         else {
-            // 如果失败，这里可以把 info 信息上报自己的服务器，便于后面分析上传错误原因
-            onFailure(@[@{
-                 @"success": @(NO),
-            }]);
+            reject([NSString stringWithFormat:@"%d", info.statusCode], info.error.localizedDescription, nil);
         }
     }
     option:uploadOption];
