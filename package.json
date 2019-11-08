@@ -1,0 +1,24 @@
+{
+  "name": "react-native-pure-qiniu",
+  "version": "0.0.1",
+  "description": "react native qiniu",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/musicode/react-native-pure-qiniu.git"
+  },
+  "keywords": [
+    "react",
+    "native",
+    "qiniu"
+  ],
+  "author": "musicode",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/musicode/react-native-pure-qiniu/issues"
+  },
+  "homepage": "https://github.com/musicode/react-native-pure-qiniu#readme"
+}
