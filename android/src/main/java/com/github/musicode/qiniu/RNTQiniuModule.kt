@@ -1,12 +1,10 @@
 package com.github.musicode.qiniu
 
-import android.os.Build
 import com.facebook.react.bridge.*
-import android.util.DisplayMetrics
-import android.view.Display
-import android.content.Context.WINDOW_SERVICE
-import android.view.WindowManager
-import java.lang.Exception
+import com.qiniu.android.common.FixedZone
+import com.qiniu.android.storage.Configuration
+import com.qiniu.android.storage.UploadManager
+import com.qiniu.android.storage.UploadOptions
 
 class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -15,22 +13,56 @@ class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactC
     }
 
     @ReactMethod
-    fun getStatusBarHeight(promise: Promise) {
+    fun upload(options: ReadableMap, onSuccess: Callback, onFailure: Callback, onProgress: Callback) {
 
-        val resources = reactApplicationContext.resources
-        val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        val path = options.getString("path")
+        val key = options.getString("key")
+        val zone = options.getString("zone")
+        val token = options.getString("token")
+        val mimeType = options.getString("mimeType")
+        val params = options.getMap("params")
 
-        val height = if (resId > 0) {
-            (resources.getQiniuPixelSize(resId) / resources.displayMetrics.density).toInt()
-        }
-        else {
-            0
-        }
+        val config = Configuration.Builder()
+                .useHttps(true)
+                .zone(
+                        when (zone) {
+                            "huadong" -> FixedZone.zone0
+                            "huabei" -> FixedZone.zone1
+                            "huanan" -> FixedZone.zone2
+                            else -> FixedZone.zoneNa0
+                        }
+                )
+                .build()
 
-        val map = Arguments.createMap()
-        map.putInt("height", height)
+        val uploadManager = UploadManager(config)
 
-        promise.resolve(map)
+        val uploadOptions = UploadOptions(
+                params as? Map<String, String>,
+                mimeType,
+                false,
+                { _, percent ->
+                    val map = Arguments.createMap()
+                    map.putDouble("progress", percent)
+                    onProgress.invoke(map)
+                },
+                null
+        )
+
+        uploadManager.put(path, key, token,
+                { _, info, response ->
+                    //res包含hash、key等信息，具体字段取决于上传策略的设置
+                    if (info.isOK) {
+                        val map = Arguments.createMap()
+                        map.putBoolean("success", true)
+                        onSuccess.invoke(map)
+                    }
+                    else {
+                        // 如果失败，这里可以把 info 信息上报自己的服务器，便于后面分析上传错误原因
+                        val map = Arguments.createMap()
+                        map.putBoolean("success", false)
+                        onFailure.invoke(map)
+                    }
+                }, uploadOptions)
 
     }
 
