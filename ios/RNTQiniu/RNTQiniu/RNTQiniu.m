@@ -6,10 +6,16 @@
 
 RCT_EXPORT_MODULE(RNTQiniu);
 
+- (NSArray<NSString *> *)supportedEvents {
+  return @[@"progress"];
+}
+
 RCT_EXPORT_METHOD(upload:(NSDictionary*)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
 
+    int index = [RCTConvert int:options[@"index"]];
+    
     NSString *path = [RCTConvert NSString:options[@"path"]];
     NSString *key = [RCTConvert NSString:options[@"key"]];
     NSString *zone = [RCTConvert NSString:options[@"zone"]];
@@ -39,7 +45,14 @@ RCT_EXPORT_METHOD(upload:(NSDictionary*)options
 
     QNUploadOption *uploadOption = [[QNUploadOption alloc] initWithMime:mimeType
                                                 progressHandler:^(NSString *key, float percent) {
-                                                    // 回调函数或 promise 都只能调一次，如果要对外发送进度，得用事件，太麻烦了，算了
+            
+                                                    if (index > 0) {
+                                                        [self sendEventWithName:@"progress" body:@{
+                                                            @"index": @(index),
+                                                            @"progress": @(percent),
+                                                        }];
+                                                    }
+        
                                                 }
                                                 params:nil
                                                 checkCrc:NO

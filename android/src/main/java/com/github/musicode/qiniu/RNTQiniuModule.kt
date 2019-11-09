@@ -5,6 +5,9 @@ import com.qiniu.android.common.FixedZone
 import com.qiniu.android.storage.Configuration
 import com.qiniu.android.storage.UploadManager
 import com.qiniu.android.storage.UploadOptions
+import com.facebook.react.modules.core.DeviceEventManagerModule
+
+
 
 class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -14,6 +17,13 @@ class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactC
 
     @ReactMethod
     fun upload(options: ReadableMap, promise: Promise) {
+
+        val index = if (options.hasKey("index")) {
+            options.getInt("index")
+        }
+        else {
+            0
+        }
 
         val path = options.getString("path")
         val key = options.getString("key")
@@ -35,12 +45,20 @@ class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactC
 
         val uploadManager = UploadManager(config)
 
+        val eventEmitter = reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+
         val uploadOptions = UploadOptions(
                 null,
                 mimeType,
                 false,
                 { _, percent ->
-                    // 回调或 promise 只能调用一次，progress 没法用
+                    if (index > 0) {
+                        val map = Arguments.createMap()
+                        map.putInt("index", index)
+                        map.putDouble("progress", percent)
+                        eventEmitter.emit("progress", map)
+                    }
                 },
                 null
         )

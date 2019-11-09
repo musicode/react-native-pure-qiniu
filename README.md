@@ -2,13 +2,13 @@
 
 七牛上传文件。
 
-不支持分片上传和获取上传进度。
+不支持分片上传。
 
 ## 安装
 
 ```
 npm i react-native-pure-qiniu
-// link below 0.60
+// 0.60 以下手动执行 link
 react-native link react-native-pure-qiniu
 ```
 
@@ -28,14 +28,18 @@ Qiniu.upload(
     zone: 'huabei',
     // 上传文件的 mime type
     mimeType: 'image/png',
-  }
-)
-.then(
-  data => {
-    // 成功
   },
-  error => {
-    // 失败
+  // 如果需要获取上传进度
+  // 传入第二个参数，progress 取值范围为 0-1
+  // 如果不需要获取上传进度，最好不传此参数，避免 js/native 频繁通信
+  function (progress) {
+
   }
 )
+.then(data => {
+  // 成功
+})
+.catch(error => {
+  // 失败
+})
 ```

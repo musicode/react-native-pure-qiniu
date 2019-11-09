@@ -1,6 +1,7 @@
-#import <React/RCTViewManager.h>
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
+#import <React/RCTConvert.h>
 
-@interface RNTQiniu : NSObject <RCTBridgeModule>
+@interface RNTQiniu : RCTEventEmitter <RCTBridgeModule>
 
 @end
