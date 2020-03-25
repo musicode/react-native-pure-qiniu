@@ -7,8 +7,6 @@ import com.qiniu.android.storage.UploadManager
 import com.qiniu.android.storage.UploadOptions
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
-
-
 class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     override fun getName(): String {
@@ -72,19 +70,26 @@ class RNTQiniuModule(private val reactContext: ReactApplicationContext) : ReactC
 
                         val iterator = response.keys()
                         while (iterator.hasNext()) {
-                            val key = iterator.next()
-                            val value = response.get(key)
-                            if (value is String) {
-                                map.putString(key, value)
-                            }
-                            else if (value is Int) {
-                                map.putInt(key, value)
-                            }
-                            else if (value is Boolean) {
-                                map.putBoolean(key, value)
-                            }
-                            else if (value is Double) {
-                                map.putDouble(key, value)
+                            val name = iterator.next()
+                            when (val value = response.get(name)) {
+                                is String -> {
+                                    map.putString(name, value)
+                                }
+                                is Int -> {
+                                    map.putInt(name, value)
+                                }
+                                is Boolean -> {
+                                    map.putBoolean(name, value)
+                                }
+                                is Double -> {
+                                    map.putDouble(name, value)
+                                }
+                                is Float -> {
+                                    map.putDouble(name, value.toDouble())
+                                }
+                                else -> {
+
+                                }
                             }
                         }
 

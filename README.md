@@ -15,8 +15,8 @@ react-native link react-native-pure-qiniu
 ## 用法
 
 ```js
-import Qiniu from 'react-native-pure-qiniu'
-Qiniu.upload(
+import qiniu from 'react-native-pure-qiniu'
+qiniu.upload(
   {
     // 上传到云端的文件名
     key: 'key',
