@@ -1,5 +1,7 @@
 # react-native-pure-qiniu
 
+已弃用，请使用 [qiniu](https://github.com/react-native-hero/qiniu)。
+
 七牛上传文件。
 
 不支持分片上传。
